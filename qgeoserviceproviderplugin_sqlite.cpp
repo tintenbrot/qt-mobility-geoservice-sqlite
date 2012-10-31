@@ -20,46 +20,35 @@
 **
 ****************************************************************************/
 
-#include "qgeoserviceproviderplugin_offline.h"
-#include "qgeomappingmanagerengine_offline.h"
+#include "qgeoserviceproviderplugin_sqlite.h"
+#include "qgeomappingmanagerengine_sqlite.h"
 
 #include <QtPlugin>
 #include <QDebug>
 
-QGeoServiceProviderFactoryOffline::QGeoServiceProviderFactoryOffline()
+QGeoServiceProviderFactorySqlite::QGeoServiceProviderFactorySqlite()
 {
-//    QObjectUserData *FileTyp=new QObjectUserData();
-//    *FileTyp << "TEst";
-//    this->setUserData(0,FileTyp);
 }
 
-QGeoServiceProviderFactoryOffline::~QGeoServiceProviderFactoryOffline() {}
+QGeoServiceProviderFactorySqlite::~QGeoServiceProviderFactorySqlite() {}
 
-QString QGeoServiceProviderFactoryOffline::providerName() const
+QString QGeoServiceProviderFactorySqlite::providerName() const
 {
-    return "offline map";
+    return "offline map (sqlite)";
 }
 
-int QGeoServiceProviderFactoryOffline::providerVersion() const
+int QGeoServiceProviderFactorySqlite::providerVersion() const
 {
     return 2;
 }
 
-QStringList QGeoServiceProviderFactoryOffline::validFileExt() const
-{
-    QStringList ar_ValidExt;
-    ar_ValidExt << "osz;AFTrack (OSZ)";
-    ar_ValidExt << "sqlitedb;Big Planet Tracks SQLite";
-    return ar_ValidExt;
-}
-
-QGeoMappingManagerEngine* QGeoServiceProviderFactoryOffline::createMappingManagerEngine(const QMap<QString, QVariant> &parameters,
+QGeoMappingManagerEngine* QGeoServiceProviderFactorySqlite::createMappingManagerEngine(const QMap<QString, QVariant> &parameters,
         QGeoServiceProvider::Error *error,
         QString *errorString)const
 {
-    return new QGeoMappingManagerEngineOffline(parameters, error, errorString);
+    return new QGeoMappingManagerEngineSqlite(parameters, error, errorString);
 }
 
 
 
-Q_EXPORT_PLUGIN2(qtgeoservices_offline, QGeoServiceProviderFactoryOffline)
+Q_EXPORT_PLUGIN2(qtgeoservices_sqlite, QGeoServiceProviderFactorySqlite)

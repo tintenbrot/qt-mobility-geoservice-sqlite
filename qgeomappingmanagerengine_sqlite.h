@@ -20,15 +20,14 @@
 **
 ****************************************************************************/
 
-#ifndef QGEOMAPPINGMANAGERENGINE_OFFLINE_H
-#define QGEOMAPPINGMANAGERENGINE_OFFLINE_H
+#ifndef QGEOMAPPINGMANAGERENGINE_SQLITE_H
+#define QGEOMAPPINGMANAGERENGINE_SQLITE_H
 
-#include "qgeoserviceproviderplugin_offline.h"
+#include "qgeoserviceproviderplugin_sqlite.h"
 
 #include <qgeoserviceprovider.h>
 #include <qgeotiledmappingmanagerengine.h>
-#include "quazip.h"
-#include "quazipfile.h"
+
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
@@ -36,30 +35,27 @@
 
 // If tile is recently updated - do not send any request to server until N days pass
 // def tile cache size in bytes;  use 0 value for unlimited cache;
-#define OSZ_FILE "default.sqlitedb"
+#define SQLITE_FILE "default.sqlitedb"
 
 QTM_USE_NAMESPACE
 
-class QGeoMappingManagerEngineOffline : public QGeoTiledMappingManagerEngine
+class QGeoMappingManagerEngineSqlite : public QGeoTiledMappingManagerEngine
 {
     Q_OBJECT
 public:
-    QGeoMappingManagerEngineOffline(const QMap<QString, QVariant> &parameters,
+    QGeoMappingManagerEngineSqlite(const QMap<QString, QVariant> &parameters,
                                   QGeoServiceProvider::Error *error,
                                   QString *errorString);
-    ~QGeoMappingManagerEngineOffline();
+    ~QGeoMappingManagerEngineSqlite();
 
     QGeoTiledMapReply* getTileImage(const QGeoTiledMapRequest &request);
 
 
 private:
-    Q_DISABLE_COPY(QGeoMappingManagerEngineOffline)
+    Q_DISABLE_COPY(QGeoMappingManagerEngineSqlite)
 
     QMap<QString, QVariant> m_parameters;
 
-    enum t_FileFormat { OSZ=0, SQLITEDB };
-
-    QuaZip  m_zip;
     quint16 m_ZoomMin;
     quint16 m_ZoomMax;
 
@@ -68,8 +64,6 @@ private:
 
     QSqlDatabase *m_sqlite;
 
-
-    t_FileFormat m_FileFormat;
 };
 
 #endif

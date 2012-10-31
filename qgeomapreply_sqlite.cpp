@@ -21,8 +21,8 @@
 ****************************************************************************/
 
 #include "qgeomapreply_sqlite.h"
-#include "debug_osz.h"
-#include "qgeomappingmanagerengine_offline.h"
+#include "debug_sqlite.h"
+#include "qgeomappingmanagerengine_sqlite.h"
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
@@ -50,16 +50,8 @@ QGeoMapReplySqlite::QGeoMapReplySqlite(QSqlDatabase *sqlite, const QGeoTiledMapR
     // Image ist eindeutig, also mit Next kommt ein Bild oder nicht
     if (query.next())
     {
+        // Imageformat is automatically chosen, so do not define it
         setMapImageData(query.value(0).toByteArray());
-//        quint16 uiIdentifier = query.value(0).toByteArray().at(0) < 8;
-//        uiIdentifier += query.value(0).toByteArray().at(1);
-//        qDebug() << "Identifier=" << uiIdentifier;
-//        qDebug() << "Kennung(0)=" << (quint8)query.value(0).toByteArray().at(0);
-//        qDebug() << "Kennung(1)=" << (quint8)query.value(0).toByteArray().at(1);
-//        qDebug() << "Kennung(2)=" << (quint8)query.value(0).toByteArray().at(2);
-//        if (uiIdentifier==0xFFD8) //ID: JPG
-//            setMapImageFormat("JPG");
-        // GeoServiceProvider chooses the correct format atomatically. - So setting of ImageFormat is not neccessary
         setFinished(true);
     }
     else

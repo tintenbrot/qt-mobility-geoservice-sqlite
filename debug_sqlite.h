@@ -20,21 +20,19 @@
 **
 ****************************************************************************/
 
-#ifndef DEBUG_OSZ_H
-#define DEBUG_OSZ_H
+#ifndef DEBUG_SQLITE_H
+#define DEBUG_SQLITE_H
 
 #include <QString>
 #include <QDebug>
 
 
-#define TILES_M		"Tiles"
-
 
 #if 0
-#define DBG_OSZ(module, msg)
+#define DBG_SQLITE(module, msg)
 #else
-#define DBG_OSZ(module, msg) 							\
-	qDebug() << "OSZ_offline:" << module << ":" << msg;
+#define DBG_SQLITE(module, msg) 							\
+    qDebug() << "SQLITE_offline:" << module << ":" << msg;
 #endif
 
-#endif // DEBUG_OSZ_H
+#endif // DEBUG_SQLITE_H

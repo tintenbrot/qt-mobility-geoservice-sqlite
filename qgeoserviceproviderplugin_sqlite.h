@@ -20,25 +20,24 @@
 **
 ****************************************************************************/
 
-#ifndef QGEOSERVICEPROVIDER_OFFLINE_H
-#define QGEOSERVICEPROVIDER_OFFLINE_H
+#ifndef QGEOSERVICEPROVIDER_SQLITE_H
+#define QGEOSERVICEPROVIDER_SQLITE_H
 
 #include <qgeoserviceproviderfactory.h>
 #include <QObject>
 
 QTM_USE_NAMESPACE
 
-class QGeoServiceProviderFactoryOffline : public QObject, public QGeoServiceProviderFactory
+class QGeoServiceProviderFactorySqlite : public QObject, public QGeoServiceProviderFactory
 {
     Q_OBJECT
     Q_INTERFACES(QtMobility::QGeoServiceProviderFactory)
 public:
-    QGeoServiceProviderFactoryOffline();
-    ~QGeoServiceProviderFactoryOffline();
+    QGeoServiceProviderFactorySqlite();
+    ~QGeoServiceProviderFactorySqlite();
 
     QString providerName() const;
     int providerVersion() const;
-    QStringList validFileExt() const;
 
     QGeoMappingManagerEngine* createMappingManagerEngine(const QMap<QString, QVariant> &parameters,
             QGeoServiceProvider::Error *error,

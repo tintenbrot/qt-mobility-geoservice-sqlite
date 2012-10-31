@@ -1,6 +1,6 @@
 TEMPLATE = lib
 CONFIG += plugin
-TARGET = $$qtLibraryTarget(qtgeoservices_offline)
+TARGET = $$qtLibraryTarget(qtgeoservices_sqlite)
 
 PLUGIN_TYPE=geoservices
 
@@ -13,28 +13,28 @@ MOBILITY = location
 
 HEADERS += \
             qgeomapreply_sqlite.h \
-            qgeomappingmanagerengine_offline.h \
-            qgeoserviceproviderplugin_offline.h \
-            debug_offline.h
+            qgeomappingmanagerengine_sqlite.h \
+            qgeoserviceproviderplugin_sqlite.h \
+            debug_sqlite.h
 
 
 SOURCES += \
             qgeomapreply_sqlite.cpp \
-            qgeomappingmanagerengine_offline.cpp \
-            qgeoserviceproviderplugin_offline.cpp
+            qgeomappingmanagerengine_sqlite.cpp \
+            qgeoserviceproviderplugin_sqlite.cpp
 
 
 
-RESOURCES = qtgeoservices_offline.qrc
+RESOURCES = qt-mobility-geoservice_sqlite.qrc
 
-symbian {
-    TARGET.EPOCALLOWDLLDATA = 1
-    TARGET.CAPABILITY = Location NetworkServices
-    #TARGET.UID3 = 0x20045CF8
-}
+#symbian {
+#    TARGET.EPOCALLOWDLLDATA = 1
+#    TARGET.CAPABILITY = Location NetworkServices
+#    #TARGET.UID3 = 0x20045CF8
+#}
 
 contains(MEEGO_EDITION,harmattan) {
-    target.path = /opt/qtgeoservices_offline/lib
+    target.path = /opt/qtgeoservices_sqlite/lib
     INSTALLS += target
 }
 
