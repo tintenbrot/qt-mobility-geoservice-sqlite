@@ -28,6 +28,7 @@
 #include <qgeoserviceprovider.h>
 #include <qgeotiledmappingmanagerengine.h>
 
+#include <QDebug>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>

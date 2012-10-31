@@ -32,6 +32,7 @@
 #include <QApplication>
 #include <QFileInfo>
 
+
 #include <QSqlQuery>
 
 
@@ -60,7 +61,7 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     //
     if (keys.contains("sqlite_offline.filename")) {
         qDebug() << "Got external filename";
-        QString sfilename = m_parameters.value("tintenbrot_offline.filename").toString();
+        QString sfilename = m_parameters.value("sqlite_offline.filename").toString();
         qDebug() << sfilename;
         if (!sfilename.isEmpty())
             if (QFile(sfilename).exists())

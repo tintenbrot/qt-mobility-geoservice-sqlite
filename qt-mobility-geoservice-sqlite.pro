@@ -25,7 +25,7 @@ SOURCES += \
 
 
 
-RESOURCES = qt-mobility-geoservice_sqlite.qrc
+RESOURCES = qt-mobility-geoservice-sqlite.qrc
 
 #symbian {
 #    TARGET.EPOCALLOWDLLDATA = 1

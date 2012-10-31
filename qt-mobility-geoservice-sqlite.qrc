@@ -1,8 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file alias="tile_error">resources/tile_error.png</file>
         <file alias="tile_notavailable">resources/tile_notavailable.png</file>
         <file alias="tile_working">resources/tile_working.png</file>
-        <file alias="tile_ziperror">resources/tile_ziperror.png</file>
     </qresource>
 </RCC>
