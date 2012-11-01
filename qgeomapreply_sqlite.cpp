@@ -47,7 +47,7 @@ QGeoMapReplySqlite::QGeoMapReplySqlite(QSqlDatabase *sqlite, const QGeoTiledMapR
         qDebug() << query.lastError();
     }
     //
-    // Image ist eindeutig, also mit Next kommt ein Bild oder nicht
+    // Image is unique, so next gives the nned tile or not
     if (query.next())
     {
         // Imageformat is automatically chosen, so do not define it

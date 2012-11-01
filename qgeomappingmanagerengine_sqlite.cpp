@@ -56,13 +56,9 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     m_offlinefile += "maps";
     m_offlinefile += QDir::separator();
     m_offlinefile += SQLITE_FILE;
-    qDebug() << "home=" << m_offlinefile;
-    //m_offlinefile += OSZ_FILE; //Standard
     //
-    if (keys.contains("sqlite_offline.filename")) {
-        qDebug() << "Got external filename";
-        QString sfilename = m_parameters.value("sqlite_offline.filename").toString();
-        qDebug() << sfilename;
+    if (keys.contains("tintenbrot_offline.filename")) {
+        QString sfilename = m_parameters.value("tintenbrot_offline.filename").toString();
         if (!sfilename.isEmpty())
             if (QFile(sfilename).exists())
                 m_offlinefile = sfilename;
@@ -73,10 +69,8 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     int iMaxZoom=18;  //Standard
     //
     m_sqlite=new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE","tintenbrotConnect"));
-    qDebug() << "MainSqlite: m_offlinefile=" << m_offlinefile;
     m_sqlite->setDatabaseName(m_offlinefile);
     ok=m_sqlite->open();
-    qDebug() << "SQLITE: Open DB=" << ok;
     if (!ok) {
         qDebug() << "lastError=" << m_sqlite->lastError();
     }
@@ -84,7 +78,6 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     QSqlQuery query(*m_sqlite);
     //
     sQuery=QString("SELECT minzoom FROM info");
-    qDebug() << "Query=" << sQuery;
     ok=query.prepare(sQuery);
     if (!ok) {
         qDebug() << "lastError=" << m_sqlite->lastError();
@@ -93,11 +86,9 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     if (!ok) {
         qDebug() << "lastError=" << m_sqlite->lastError();
     }
-    qDebug() << "query MINZOOM";
     if (query.next())
     {
         iMinZoom=query.value(0).toInt()+10;
-        qDebug() << "minzoom=" << iMinZoom;
     }
     sQuery=QString("SELECT maxzoom FROM info");
     ok=query.prepare(sQuery);
@@ -110,7 +101,6 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     setMinimumZoomLevel(iMinZoom);
     setMaximumZoomLevel(iMaxZoom);
     setTileSize(QSize(256,256));
-
 
     //SL_MAP_TYPE
     QList<QGraphicsGeoMap::MapType> types;
