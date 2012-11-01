@@ -34,7 +34,7 @@ QGeoServiceProviderFactorySqlite::~QGeoServiceProviderFactorySqlite() {}
 
 QString QGeoServiceProviderFactorySqlite::providerName() const
 {
-    return "offline map (sqlite)";
+    return "offline map (sqlitedb)";
 }
 
 int QGeoServiceProviderFactorySqlite::providerVersion() const
