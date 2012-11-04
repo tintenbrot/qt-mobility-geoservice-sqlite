@@ -25,15 +25,13 @@
 
 #include <qgeotiledmaprequest.h>
 
-#include <QDesktopServices>
-#include <QSize>
+//#include <QDesktopServices>
+//#include <QSize>
 #include <QDir>
-#include <QDateTime>
-#include <QApplication>
-#include <QFileInfo>
-
-
-#include <QSqlQuery>
+//#include <QDateTime>
+//#include <QApplication>
+//#include <QFileInfo>
+//#include <QSqlQuery>
 
 
 QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QString, QVariant> &parameters, QGeoServiceProvider::Error *error, QString *errorString)

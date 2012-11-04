@@ -39,7 +39,7 @@ QString QGeoServiceProviderFactorySqlite::providerName() const
 
 int QGeoServiceProviderFactorySqlite::providerVersion() const
 {
-    return 2;
+    return 3;
 }
 
 QGeoMappingManagerEngine* QGeoServiceProviderFactorySqlite::createMappingManagerEngine(const QMap<QString, QVariant> &parameters,

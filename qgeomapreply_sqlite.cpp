@@ -23,36 +23,49 @@
 #include "qgeomapreply_sqlite.h"
 #include "debug_sqlite.h"
 #include "qgeomappingmanagerengine_sqlite.h"
-#include <QSqlDatabase>
-#include <QSqlQuery>
 #include <QSqlError>
 #include <QFile>
+#include <QtConcurrentRun>
 
 QGeoMapReplySqlite::QGeoMapReplySqlite(QSqlDatabase *sqlite, const QGeoTiledMapRequest &request, QObject *parent)
-        : QGeoTiledMapReply(request, parent),
-        m_tileRequest(request)
+        : QGeoTiledMapReply(request, parent)
+{
+    m_query = QSqlQuery(*sqlite);
+    //
+    m_tileKey=getTileKey(request);
+    //
+    QFuture<void> future = QtConcurrent::run(this, &QGeoMapReplySqlite::getTile);
+    m_fwatcher.setFuture(future);
+    connect(&m_fwatcher, SIGNAL(finished()), this, SLOT(getTileFinished()));
+}
+
+
+QGeoMapReplySqlite::~QGeoMapReplySqlite()
+{
+}
+
+QString QGeoMapReplySqlite::getTileKey(const QGeoTiledMapRequest &request) const
+{
+    return QString("SELECT image FROM tiles WHERE x=%1 AND y=%2 AND z=%3").arg(request.column()).arg(request.row()).arg(17-request.zoomLevel());
+}
+
+void QGeoMapReplySqlite::getTile()
 {
     bool ok;
-
-    QSqlQuery query(*sqlite);
-    QString sQuery=QString("SELECT image FROM tiles WHERE x=%1 AND y=%2 AND z=%3").arg(request.column()).arg(request.row()).arg(17-request.zoomLevel());
-    qDebug() << "Query=" << sQuery;
-    ok=query.prepare(sQuery);
+    ok=m_query.prepare(m_tileKey);
     if (!ok) {
-        qDebug() << query.lastError();
+        qDebug() << m_query.lastError();
     }
-    ok = query.exec();
-    qDebug() << "SQLITE: Query: " << ok;
+    ok = m_query.exec();
     if (!ok) {
-        qDebug() << query.lastError();
+        qDebug() << m_query.lastError();
     }
     //
-    // Image is unique, so next gives the nned tile or not
-    if (query.next())
+    // Image is unique, so next gives the needed tile or not
+    if (m_query.next())
     {
         // Imageformat is automatically chosen, so do not define it
-        setMapImageData(query.value(0).toByteArray());
-        setFinished(true);
+        setMapImageData(m_query.value(0).toByteArray());
     }
     else
     {
@@ -61,15 +74,13 @@ QGeoMapReplySqlite::QGeoMapReplySqlite(QSqlDatabase *sqlite, const QGeoTiledMapR
         setMapImageData(fileError.readAll());
         setMapImageFormat("PNG");
         fileError.close();
-        setFinished(true);
     }
 }
 
-
-QGeoMapReplySqlite::~QGeoMapReplySqlite()
+void QGeoMapReplySqlite::getTileFinished()
 {
+    setFinished(true);
 }
-
 
 void QGeoMapReplySqlite::abort()
 {

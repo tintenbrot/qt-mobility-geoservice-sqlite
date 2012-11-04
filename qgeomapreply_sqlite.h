@@ -24,7 +24,8 @@
 #define QGEOMAPREPLY_SQLITE_H
 
 #include <qgeotiledmapreply.h>
-#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QFutureWatcher>
 
 
 QTM_USE_NAMESPACE
@@ -40,12 +41,22 @@ public:
 
     ~QGeoMapReplySqlite();
 
+    QString getTileKey(const QGeoTiledMapRequest &request) const;
+
     void abort();
 
 private slots:
 
+protected:
+    void getTile();
+
+protected slots:
+    void getTileFinished();
+
 private:
-    const QGeoTiledMapRequest &m_tileRequest;
+    QSqlQuery m_query;
+    QString m_tileKey;
+    QFutureWatcher<void> m_fwatcher;
 };
 
 #endif
