@@ -35,7 +35,7 @@ QGeoMapReplySqlite::QGeoMapReplySqlite(QSqlDatabase *sqlite, const QGeoTiledMapR
     bool ok;
 
     QSqlQuery query(*sqlite);
-    QString sQuery=QString("SELECT image FROM tiles WHERE x=%1 AND y=%2").arg(request.column()).arg(request.row());
+    QString sQuery=QString("SELECT image FROM tiles WHERE x=%1 AND y=%2 AND z=%3").arg(request.column()).arg(request.row()).arg(17-request.zoomLevel());
     qDebug() << "Query=" << sQuery;
     ok=query.prepare(sQuery);
     if (!ok) {

@@ -57,8 +57,8 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     m_offlinefile += QDir::separator();
     m_offlinefile += SQLITE_FILE;
     //
-    if (keys.contains("tintenbrot_offline.filename")) {
-        QString sfilename = m_parameters.value("tintenbrot_offline.filename").toString();
+    if (keys.contains("localfile")) {
+        QString sfilename = m_parameters.value("localfile").toString();
         if (!sfilename.isEmpty())
             if (QFile(sfilename).exists())
                 m_offlinefile = sfilename;
@@ -88,15 +88,28 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     }
     if (query.next())
     {
-        iMinZoom=query.value(0).toInt()+10;
+        //iMinZoom=query.value(0).toInt()+10;
+        iMaxZoom=17-query.value(0).toInt();
     }
     sQuery=QString("SELECT maxzoom FROM info");
     ok=query.prepare(sQuery);
     ok=query.exec();
     if (query.next())
     {
-        iMaxZoom=query.value(0).toInt()+10;
+        //iMaxZoom=query.value(0).toInt()+10;
+        iMinZoom=17-query.value(0).toInt();
     }
+    //
+    // limit Zoomlevels to prevent nonsense-Values to crash app
+    if (iMinZoom<0) iMinZoom=0;
+    if (iMinZoom>18) iMinZoom=18;
+    if (iMaxZoom<0) iMaxZoom=0;
+    if (iMaxZoom>18) iMaxZoom=18;
+    if (iMinZoom>iMaxZoom)
+        std::swap(iMinZoom,iMaxZoom);
+    //
+    qDebug() << "minzoom=" << iMinZoom;
+    qDebug() << "maxZoom=" << iMaxZoom;
     //
     setMinimumZoomLevel(iMinZoom);
     setMaximumZoomLevel(iMaxZoom);
