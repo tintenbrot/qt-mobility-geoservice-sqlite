@@ -26,13 +26,19 @@
 #include <QSqlError>
 #include <QFile>
 #include <QtConcurrentRun>
+#include <QImage>
+#include <QBuffer>
 
 QGeoMapReplySqlite::QGeoMapReplySqlite(QSqlDatabase *sqlite, const QGeoTiledMapRequest &request, QObject *parent)
         : QGeoTiledMapReply(request, parent)
 {
     m_query = QSqlQuery(*sqlite);
     //
-    m_tileKey=getTileKey(request);
+    QGeoMappingManagerEngineSqlite *mapManagerEngineSqlite = static_cast<QGeoMappingManagerEngineSqlite*>(parent);
+    m_MaxZoom=mapManagerEngineSqlite->getMaxZoom();
+    //
+    //m_tileKey=getTileKey(request);
+    getTileKey(request);
     //
     QFuture<void> future = QtConcurrent::run(this, &QGeoMapReplySqlite::getTile);
     m_fwatcher.setFuture(future);
@@ -44,9 +50,45 @@ QGeoMapReplySqlite::~QGeoMapReplySqlite()
 {
 }
 
-QString QGeoMapReplySqlite::getTileKey(const QGeoTiledMapRequest &request) const
+void QGeoMapReplySqlite::getTileKey(const QGeoTiledMapRequest &request)
 {
-    return QString("SELECT image FROM tiles WHERE x=%1 AND y=%2 AND z=%3").arg(request.column()).arg(request.row()).arg(17-request.zoomLevel());
+    //QString sKey;
+    int iZoom=request.zoomLevel();
+    int iX=request.column();
+    int iY=request.row();
+    int iWidth=256;
+    int iLeft=0, iTop=0;
+    //
+    if (iZoom>m_MaxZoom) //Need PixelZoom
+    {
+        int iDiff=iZoom-m_MaxZoom;
+//        qDebug() << "PixelZoomOrg: iZoom=" << iZoom;
+//        qDebug() << "PixelZoomOrg: iX=" << iX;
+//        qDebug() << "PixelZoomOrg: iY=" << iY;
+        iZoom=m_MaxZoom;
+        iLeft=iX % (1<<iDiff);
+        iTop=iY % (1<<iDiff);
+        iX=iX>>iDiff;
+        iY=iY>>iDiff;
+        iWidth=iWidth>>iDiff;
+        iLeft=iLeft*iWidth;
+        iTop=iTop*iWidth;
+        //
+//        qDebug() << "PixelZoom: iZoom=" << iZoom;
+//        qDebug() << "PixelZoom: iX=" << iX;
+//        qDebug() << "PixelZoom: iY=" << iY;
+
+
+    }
+//    qDebug() << "PixelZoom: iLeft=" << iLeft;
+//    qDebug() << "PixelZoom: iTop=" << iTop;
+//    qDebug() << "PixelZoom: iWidth=" << iWidth;
+    m_CutOut.setLeft(iLeft);
+    m_CutOut.setTop(iTop);
+    m_CutOut.setWidth(iWidth);
+    m_CutOut.setHeight(iWidth); //tiles are squared, so Width=Height!
+
+    m_tileKey=QString("SELECT image FROM tiles WHERE x=%1 AND y=%2 AND z=%3").arg(iX).arg(iY).arg(17-iZoom);;
 }
 
 void QGeoMapReplySqlite::getTile()
@@ -64,8 +106,23 @@ void QGeoMapReplySqlite::getTile()
     // Image is unique, so next gives the needed tile or not
     if (m_query.next())
     {
-        // Imageformat is automatically chosen, so do not define it
-        setMapImageData(m_query.value(0).toByteArray());
+        if (m_CutOut.width()==256) {
+            // Imageformat is automatically chosen, so do not define it
+            setMapImageData(m_query.value(0).toByteArray());
+        }
+        else //Pixelzoom is needed
+        {
+            QImage myPixelZoom=QImage::fromData(m_query.value(0).toByteArray());
+            myPixelZoom=myPixelZoom.copy(m_CutOut);
+            myPixelZoom=myPixelZoom.scaled(QSize(256,256));
+
+            QByteArray ba;
+            QBuffer buffer(&ba);
+            buffer.open(QIODevice::WriteOnly);
+            myPixelZoom.save(&buffer, "PNG");
+            setMapImageData(ba);
+            setMapImageFormat("PNG");
+        }
     }
     else
     {

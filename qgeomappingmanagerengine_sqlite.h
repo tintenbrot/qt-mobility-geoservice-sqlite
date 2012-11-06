@@ -51,6 +51,7 @@ public:
 
     QGeoTiledMapReply* getTileImage(const QGeoTiledMapRequest &request);
 
+    int getMaxZoom();
 
 private:
     Q_DISABLE_COPY(QGeoMappingManagerEngineSqlite)

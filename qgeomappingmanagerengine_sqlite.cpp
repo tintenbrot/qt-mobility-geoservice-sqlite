@@ -88,6 +88,8 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     {
         //iMinZoom=query.value(0).toInt()+10;
         iMaxZoom=17-query.value(0).toInt();
+        m_ZoomMax=iMaxZoom;
+        iMaxZoom+=3;
     }
     sQuery=QString("SELECT maxzoom FROM info");
     ok=query.prepare(sQuery);
@@ -96,6 +98,7 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     {
         //iMaxZoom=query.value(0).toInt()+10;
         iMinZoom=17-query.value(0).toInt();
+        m_ZoomMin=iMinZoom;
     }
     //
     // limit Zoomlevels to prevent nonsense-Values to crash app
@@ -117,6 +120,11 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     QList<QGraphicsGeoMap::MapType> types;
     types << QGraphicsGeoMap::StreetMap;    
     setSupportedMapTypes(types);
+}
+
+int QGeoMappingManagerEngineSqlite::getMaxZoom()
+{
+    return m_ZoomMax;
 }
 
 QGeoMappingManagerEngineSqlite::~QGeoMappingManagerEngineSqlite()

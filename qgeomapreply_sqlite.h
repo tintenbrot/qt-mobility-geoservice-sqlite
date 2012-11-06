@@ -26,6 +26,7 @@
 #include <qgeotiledmapreply.h>
 #include <QSqlQuery>
 #include <QFutureWatcher>
+#include <QRect>
 
 
 QTM_USE_NAMESPACE
@@ -41,7 +42,8 @@ public:
 
     ~QGeoMapReplySqlite();
 
-    QString getTileKey(const QGeoTiledMapRequest &request) const;
+    //QString getTileKey(const QGeoTiledMapRequest &request) const;
+
 
     void abort();
 
@@ -54,8 +56,12 @@ protected slots:
     void getTileFinished();
 
 private:
+    void getTileKey(const QGeoTiledMapRequest &request);
+
     QSqlQuery m_query;
     QString m_tileKey;
+    int m_MaxZoom;
+    QRect m_CutOut;
     QFutureWatcher<void> m_fwatcher;
 };
 
