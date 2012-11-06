@@ -103,9 +103,9 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     //
     // limit Zoomlevels to prevent nonsense-Values to crash app
     if (iMinZoom<0) iMinZoom=0;
-    if (iMinZoom>18) iMinZoom=18;
+    if (iMinZoom>20) iMinZoom=20;
     if (iMaxZoom<0) iMaxZoom=0;
-    if (iMaxZoom>18) iMaxZoom=18;
+    if (iMaxZoom>20) iMaxZoom=20;
     if (iMinZoom>iMaxZoom)
         std::swap(iMinZoom,iMaxZoom);
     //
