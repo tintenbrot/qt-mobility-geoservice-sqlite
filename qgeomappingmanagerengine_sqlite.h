@@ -33,9 +33,6 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
-
-// If tile is recently updated - do not send any request to server until N days pass
-// def tile cache size in bytes;  use 0 value for unlimited cache;
 #define SQLITE_FILE "default.sqlitedb"
 
 QTM_USE_NAMESPACE
@@ -60,9 +57,6 @@ private:
 
     quint16 m_ZoomMin;
     quint16 m_ZoomMax;
-
-    QString m_offlinefile;
-    QString m_tileExt;
 
     QSqlDatabase *m_sqlite;
 

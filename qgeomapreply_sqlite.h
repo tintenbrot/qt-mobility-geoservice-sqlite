@@ -42,9 +42,6 @@ public:
 
     ~QGeoMapReplySqlite();
 
-    //QString getTileKey(const QGeoTiledMapRequest &request) const;
-
-
     void abort();
 
 private slots:

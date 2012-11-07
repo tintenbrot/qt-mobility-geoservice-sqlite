@@ -38,6 +38,7 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
         : QGeoTiledMappingManagerEngine(parameters),
         m_parameters(parameters)
 {
+    QString sSqliteFile="";
     m_sqlite=0;
     //
     Q_UNUSED(error)
@@ -45,29 +46,29 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
 
     QList<QString> keys = m_parameters.keys();
 
-    m_tileExt="png";
-    m_offlinefile=QDir::homePath()+QDir::separator();
+    sSqliteFile=QDir::homePath()+QDir::separator();
 #if defined(__ARMEL__) //Harmattan
-    m_offlinefile +=  "MyDocs";
-    m_offlinefile += QDir::separator();
+    sSqliteFile += "MyDocs";
+    sSqliteFile += QDir::separator();
 #endif
-    m_offlinefile += "maps";
-    m_offlinefile += QDir::separator();
-    m_offlinefile += SQLITE_FILE;
+    sSqliteFile += "maps";
+    sSqliteFile += QDir::separator();
+    sSqliteFile += SQLITE_FILE;
     //
-    if (keys.contains("localfile")) {
-        QString sfilename = m_parameters.value("localfile").toString();
-        if (!sfilename.isEmpty())
-            if (QFile(sfilename).exists())
-                m_offlinefile = sfilename;
-    }
+    if (keys.contains("localfile"))
+        sSqliteFile= m_parameters.value("localfile").toString();
+    //
+    if (sSqliteFile.isEmpty()) return;
+    if (!(QFile(sSqliteFile).exists())) return;
+    //
+    // File exists
     bool ok;
     QString sQuery;
     int iMinZoom=10;  //Standard
     int iMaxZoom=18;  //Standard
     //
     m_sqlite=new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE","tintenbrotConnect"));
-    m_sqlite->setDatabaseName(m_offlinefile);
+    m_sqlite->setDatabaseName(sSqliteFile);
     ok=m_sqlite->open();
     if (!ok) {
         qDebug() << "lastError=" << m_sqlite->lastError();
@@ -86,7 +87,6 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     }
     if (query.next())
     {
-        //iMinZoom=query.value(0).toInt()+10;
         iMaxZoom=17-query.value(0).toInt();
         m_ZoomMax=iMaxZoom;
         iMaxZoom+=3;
@@ -96,7 +96,6 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     ok=query.exec();
     if (query.next())
     {
-        //iMaxZoom=query.value(0).toInt()+10;
         iMinZoom=17-query.value(0).toInt();
         m_ZoomMin=iMinZoom;
     }
@@ -109,17 +108,14 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     if (iMinZoom>iMaxZoom)
         std::swap(iMinZoom,iMaxZoom);
     //
-    qDebug() << "minzoom=" << iMinZoom;
-    qDebug() << "maxZoom=" << iMaxZoom;
-    //
     setMinimumZoomLevel(iMinZoom);
     setMaximumZoomLevel(iMaxZoom);
     setTileSize(QSize(256,256));
 
-    //SL_MAP_TYPE
-    QList<QGraphicsGeoMap::MapType> types;
-    types << QGraphicsGeoMap::StreetMap;    
-    setSupportedMapTypes(types);
+    //SL_MAP_TYPE (not need within this plugin)
+//    QList<QGraphicsGeoMap::MapType> types;
+//    types << QGraphicsGeoMap::StreetMap;
+//    setSupportedMapTypes(types);
 }
 
 int QGeoMappingManagerEngineSqlite::getMaxZoom()

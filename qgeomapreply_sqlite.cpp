@@ -37,7 +37,6 @@ QGeoMapReplySqlite::QGeoMapReplySqlite(QSqlDatabase *sqlite, const QGeoTiledMapR
     QGeoMappingManagerEngineSqlite *mapManagerEngineSqlite = static_cast<QGeoMappingManagerEngineSqlite*>(parent);
     m_MaxZoom=mapManagerEngineSqlite->getMaxZoom();
     //
-    //m_tileKey=getTileKey(request);
     getTileKey(request);
     //
     QFuture<void> future = QtConcurrent::run(this, &QGeoMapReplySqlite::getTile);
@@ -52,7 +51,6 @@ QGeoMapReplySqlite::~QGeoMapReplySqlite()
 
 void QGeoMapReplySqlite::getTileKey(const QGeoTiledMapRequest &request)
 {
-    //QString sKey;
     int iZoom=request.zoomLevel();
     int iX=request.column();
     int iY=request.row();
@@ -62,9 +60,6 @@ void QGeoMapReplySqlite::getTileKey(const QGeoTiledMapRequest &request)
     if (iZoom>m_MaxZoom) //Need PixelZoom
     {
         int iDiff=iZoom-m_MaxZoom;
-//        qDebug() << "PixelZoomOrg: iZoom=" << iZoom;
-//        qDebug() << "PixelZoomOrg: iX=" << iX;
-//        qDebug() << "PixelZoomOrg: iY=" << iY;
         iZoom=m_MaxZoom;
         iLeft=iX % (1<<iDiff);
         iTop=iY % (1<<iDiff);
@@ -73,16 +68,7 @@ void QGeoMapReplySqlite::getTileKey(const QGeoTiledMapRequest &request)
         iWidth=iWidth>>iDiff;
         iLeft=iLeft*iWidth;
         iTop=iTop*iWidth;
-        //
-//        qDebug() << "PixelZoom: iZoom=" << iZoom;
-//        qDebug() << "PixelZoom: iX=" << iX;
-//        qDebug() << "PixelZoom: iY=" << iY;
-
-
     }
-//    qDebug() << "PixelZoom: iLeft=" << iLeft;
-//    qDebug() << "PixelZoom: iTop=" << iTop;
-//    qDebug() << "PixelZoom: iWidth=" << iWidth;
     m_CutOut.setLeft(iLeft);
     m_CutOut.setTop(iTop);
     m_CutOut.setWidth(iWidth);
@@ -115,13 +101,13 @@ void QGeoMapReplySqlite::getTile()
             QImage myPixelZoom=QImage::fromData(m_query.value(0).toByteArray());
             myPixelZoom=myPixelZoom.copy(m_CutOut);
             myPixelZoom=myPixelZoom.scaled(QSize(256,256));
-
+            //
             QByteArray ba;
             QBuffer buffer(&ba);
             buffer.open(QIODevice::WriteOnly);
-            myPixelZoom.save(&buffer, "PNG");
+            myPixelZoom.save(&buffer, "JPG"); //JPG-Handling is much faster then PNG
             setMapImageData(ba);
-            setMapImageFormat("PNG");
+            setMapImageFormat("JPG");
         }
     }
     else
