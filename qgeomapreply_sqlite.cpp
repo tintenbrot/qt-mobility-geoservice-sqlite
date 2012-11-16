@@ -32,7 +32,10 @@
 QGeoMapReplySqlite::QGeoMapReplySqlite(QSqlDatabase *sqlite, const QGeoTiledMapRequest &request, QObject *parent)
         : QGeoTiledMapReply(request, parent)
 {
-    m_query = QSqlQuery(*sqlite);
+    if (sqlite==0)
+        m_query=0;
+    else
+        m_query = new QSqlQuery(*sqlite);
     //
     QGeoMappingManagerEngineSqlite *mapManagerEngineSqlite = static_cast<QGeoMappingManagerEngineSqlite*>(parent);
     m_MaxZoom=mapManagerEngineSqlite->getMaxZoom();
@@ -47,6 +50,7 @@ QGeoMapReplySqlite::QGeoMapReplySqlite(QSqlDatabase *sqlite, const QGeoTiledMapR
 
 QGeoMapReplySqlite::~QGeoMapReplySqlite()
 {
+    if (!(m_query==0)) delete (m_query);
 }
 
 void QGeoMapReplySqlite::getTileKey(const QGeoTiledMapRequest &request)
@@ -80,43 +84,55 @@ void QGeoMapReplySqlite::getTileKey(const QGeoTiledMapRequest &request)
 void QGeoMapReplySqlite::getTile()
 {
     bool ok;
-    ok=m_query.prepare(m_tileKey);
-    if (!ok) {
-        qDebug() << m_query.lastError();
-    }
-    ok = m_query.exec();
-    if (!ok) {
-        qDebug() << m_query.lastError();
-    }
-    //
-    // Image is unique, so next gives the needed tile or not
-    if (m_query.next())
+    if (m_query==0)
     {
-        if (m_CutOut.width()==256) {
-            // Imageformat is automatically chosen, so do not define it
-            setMapImageData(m_query.value(0).toByteArray());
-        }
-        else //Pixelzoom is needed
-        {
-            QImage myPixelZoom=QImage::fromData(m_query.value(0).toByteArray());
-            myPixelZoom=myPixelZoom.copy(m_CutOut);
-            myPixelZoom=myPixelZoom.scaled(QSize(256,256));
-            //
-            QByteArray ba;
-            QBuffer buffer(&ba);
-            buffer.open(QIODevice::WriteOnly);
-            myPixelZoom.save(&buffer, "JPG"); //JPG-Handling is much faster then PNG
-            setMapImageData(ba);
-            setMapImageFormat("JPG");
-        }
-    }
-    else
-    {
+        qDebug() << "m_query is not valid";
         QFile fileError(":tile_notavailable");
         fileError.open(QIODevice::ReadOnly);
         setMapImageData(fileError.readAll());
         setMapImageFormat("PNG");
         fileError.close();
+    }
+    else
+    {
+        ok=m_query->prepare(m_tileKey);
+        if (!ok) {
+            qDebug() << m_query->lastError();
+        }
+        ok = m_query->exec();
+        if (!ok) {
+            qDebug() << m_query->lastError();
+        }
+        //
+        // Image is unique, so next gives the needed tile or not
+        if (m_query->next())
+        {
+            if (m_CutOut.width()==256) {
+                // Imageformat is automatically chosen, so do not define it
+                setMapImageData(m_query->value(0).toByteArray());
+            }
+            else //Pixelzoom is needed
+            {
+                QImage myPixelZoom=QImage::fromData(m_query->value(0).toByteArray());
+                myPixelZoom=myPixelZoom.copy(m_CutOut);
+                myPixelZoom=myPixelZoom.scaled(QSize(256,256));
+                //
+                QByteArray ba;
+                QBuffer buffer(&ba);
+                buffer.open(QIODevice::WriteOnly);
+                myPixelZoom.save(&buffer, "JPG"); //JPG-Handling is much faster then PNG
+                setMapImageData(ba);
+                setMapImageFormat("JPG");
+            }
+        }
+        else
+        {
+            QFile fileError(":tile_notavailable");
+            fileError.open(QIODevice::ReadOnly);
+            setMapImageData(fileError.readAll());
+            setMapImageFormat("PNG");
+            fileError.close();
+        }
     }
 }
 

@@ -25,21 +25,20 @@
 
 #include <qgeotiledmaprequest.h>
 
-//#include <QDesktopServices>
-//#include <QSize>
 #include <QDir>
-//#include <QDateTime>
-//#include <QApplication>
-//#include <QFileInfo>
-//#include <QSqlQuery>
-
 
 QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QString, QVariant> &parameters, QGeoServiceProvider::Error *error, QString *errorString)
         : QGeoTiledMappingManagerEngine(parameters),
         m_parameters(parameters)
 {
     QString sSqliteFile="";
+    //
+    // Init class to have values if sqlite-file has errors or doesn't exist
     m_sqlite=0;
+    int iMinZoom=10;  //Standard
+    int iMaxZoom=18;  //Standard
+    m_ZoomMin=iMinZoom;
+    m_ZoomMax=iMaxZoom;
     //
     Q_UNUSED(error)
     Q_UNUSED(errorString)
@@ -58,55 +57,57 @@ QGeoMappingManagerEngineSqlite::QGeoMappingManagerEngineSqlite(const QMap<QStrin
     if (keys.contains("localfile"))
         sSqliteFile= m_parameters.value("localfile").toString();
     //
-    if (sSqliteFile.isEmpty()) return;
-    if (!(QFile(sSqliteFile).exists())) return;
-    //
-    // File exists
-    bool ok;
-    QString sQuery;
-    int iMinZoom=10;  //Standard
-    int iMaxZoom=18;  //Standard
-    //
-    m_sqlite=new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE","tintenbrotConnect"));
-    m_sqlite->setDatabaseName(sSqliteFile);
-    ok=m_sqlite->open();
-    if (!ok) {
-        qDebug() << "lastError=" << m_sqlite->lastError();
-    }
-    //
-    QSqlQuery query(*m_sqlite);
-    //
-    sQuery=QString("SELECT minzoom FROM info");
-    ok=query.prepare(sQuery);
-    if (!ok) {
-        qDebug() << "lastError=" << m_sqlite->lastError();
-    }
-    ok=query.exec();
-    if (!ok) {
-        qDebug() << "lastError=" << m_sqlite->lastError();
-    }
-    if (query.next())
+    if (!sSqliteFile.isEmpty())
     {
-        iMaxZoom=17-query.value(0).toInt();
-        m_ZoomMax=iMaxZoom;
-        iMaxZoom+=3;
+        if (QFile(sSqliteFile).exists())
+        {
+            //
+            // File exists
+            bool ok;
+            QString sQuery;
+            //
+            m_sqlite=new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE","tintenbrotConnect"));
+            m_sqlite->setDatabaseName(sSqliteFile);
+            ok=m_sqlite->open();
+            if (!ok) {
+                qDebug() << "lastError=" << m_sqlite->lastError();
+            }
+            //
+            QSqlQuery query(*m_sqlite);
+            //
+            sQuery=QString("SELECT minzoom FROM info");
+            ok=query.prepare(sQuery);
+            if (!ok) {
+                qDebug() << "lastError=" << m_sqlite->lastError();
+            }
+            ok=query.exec();
+            if (!ok) {
+                qDebug() << "lastError=" << m_sqlite->lastError();
+            }
+            if (query.next())
+            {
+                iMaxZoom=17-query.value(0).toInt();
+                m_ZoomMax=iMaxZoom;
+                iMaxZoom+=3;
+            }
+            sQuery=QString("SELECT maxzoom FROM info");
+            ok=query.prepare(sQuery);
+            ok=query.exec();
+            if (query.next())
+            {
+                iMinZoom=17-query.value(0).toInt();
+                m_ZoomMin=iMinZoom;
+            }
+            //
+            // limit Zoomlevels to prevent nonsense-Values to crash app
+            if (iMinZoom<0) iMinZoom=0;
+            if (iMinZoom>20) iMinZoom=20;
+            if (iMaxZoom<0) iMaxZoom=0;
+            if (iMaxZoom>20) iMaxZoom=20;
+            if (iMinZoom>iMaxZoom)
+                std::swap(iMinZoom,iMaxZoom);
+        }
     }
-    sQuery=QString("SELECT maxzoom FROM info");
-    ok=query.prepare(sQuery);
-    ok=query.exec();
-    if (query.next())
-    {
-        iMinZoom=17-query.value(0).toInt();
-        m_ZoomMin=iMinZoom;
-    }
-    //
-    // limit Zoomlevels to prevent nonsense-Values to crash app
-    if (iMinZoom<0) iMinZoom=0;
-    if (iMinZoom>20) iMinZoom=20;
-    if (iMaxZoom<0) iMaxZoom=0;
-    if (iMaxZoom>20) iMaxZoom=20;
-    if (iMinZoom>iMaxZoom)
-        std::swap(iMinZoom,iMaxZoom);
     //
     setMinimumZoomLevel(iMinZoom);
     setMaximumZoomLevel(iMaxZoom);

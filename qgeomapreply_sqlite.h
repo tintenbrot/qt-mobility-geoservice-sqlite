@@ -55,7 +55,7 @@ protected slots:
 private:
     void getTileKey(const QGeoTiledMapRequest &request);
 
-    QSqlQuery m_query;
+    QSqlQuery *m_query;
     QString m_tileKey;
     int m_MaxZoom;
     QRect m_CutOut;
